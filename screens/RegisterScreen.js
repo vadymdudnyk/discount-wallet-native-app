@@ -1,16 +1,17 @@
 import React from 'react'
-import {Button, StyleSheet, Text, TextInput, View, AsyncStorage} from 'react-native'
-import http from './../util/http'
+import {AsyncStorage, Button, StyleSheet, Text, TextInput, View} from "react-native";
+import http from "../util/http";
 
-export default class SignInScreen extends React.Component {
+export default class RegisterScreen extends React.Component {
     static navigationOptions = {
-        title: 'Please sign in',
+        title: 'Please register',
     };
 
     constructor(props) {
         super(props);
         this.state = {
-            login: '',
+            email: '',
+            phoneNumber: '',
             password: ''
         };
     }
@@ -19,18 +20,38 @@ export default class SignInScreen extends React.Component {
         return (
             <View style={styles.container}>
                 <Text style={styles.labels}>
-                    {'Login'}
+                    {'Email'}
                 </Text>
                 <TextInput
                     style={styles.login}
-                    onChangeText={(login) => this.setState({login})}
-                    value={this.state.login}
+                    onChangeText={(email) => this.setState({email})}
+                    value={this.state.email}
                     autoFocus={true}
-                    placeholder={' Login'}
+                    placeholder={' Email'}
                     keyboardType={'email-address'}
                     returnKeyType={'next'}
                     onSubmitEditing={() => {
                         this.secondTextInput.focus();
+                    }}
+                    blurOnSubmit={false}
+                    autoCapitalize={'none'}
+                />
+                <Text style={styles.labels}>
+                    {'Phone number'}
+                </Text>
+                <TextInput
+                    style={styles.login}
+                    onChangeText={(phoneNumber) => this.setState({phoneNumber})}
+                    value={this.state.phoneNumber}
+                    autoFocus={true}
+                    placeholder={' Phone number'}
+                    keyboardType={'email-address'}
+                    returnKeyType={'next'}
+                    onSubmitEditing={() => {
+                        this.thirdTextInput.focus();
+                    }}
+                    ref={(input) => {
+                        this.secondTextInput = input;
                     }}
                     blurOnSubmit={false}
                     autoCapitalize={'none'}
@@ -44,40 +65,33 @@ export default class SignInScreen extends React.Component {
                     value={this.state.password}
                     placeholder={' Password'}
                     ref={(input) => {
-                        this.secondTextInput = input;
+                        this.thirdTextInput = input;
                     }}
                     returnKeyType={'done'}
-                    onSubmitEditing={() => this._signInAsync()}
+                    onSubmitEditing={() => this.registerAsync()}
                     secureTextEntry={true}
                 />
-                <Button title="Sign in!" onPress={this._signInAsync}/>
-                <Button title={"Register"} onPress={this.registerScreen}/>
+                <Button title="Register" onPress={this.registerAsync}/>
             </View>
         );
     }
 
-    _signInAsync = async () => {
-        await this.authenticate()
-    };
-
-    authenticate = async () => {
-        console.log("Authenticate")
-        try{
-            let response = await http.authenticate(this.state.login, this.state.password);
-            await AsyncStorage.setItem('userToken', response.token);
+    registerAsync = async () => {
+        console.log("registering");
+        try {
+            const registerResponse = await http.register(this.state.email, this.state.phoneNumber, this.state.password);
+            console.log(registerResponse);
+            console.log("Authenticated successfully");
+            await AsyncStorage.setItem('userToken', registerResponse.token);
             this.props.navigation.navigate('Main');
             console.log("Authenticated successfully")
         } catch (e) {
-            console.log("Couldn't authenticate");
-            console.log(e)
+            console.log("Couldn't register");
+            console.log(e);
         }
     };
-
-    registerScreen = async () => {
-        console.log("Going to register screen");
-        this.props.navigation.navigate("Register");
-    }
 }
+
 
 const styles = StyleSheet.create({
     container: {
