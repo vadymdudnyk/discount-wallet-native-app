@@ -74,6 +74,21 @@ async function subscribeToBusiness(id) {
     return Promise.reject('Error while fetching discovered businesses')
 }
 
+async function getCustomerCoupons() {
+    const userToken = await AsyncStorage.getItem('userToken');
+    let response = await fetch(url + '/customer/coupons', {
+        method: 'GET',
+        headers: {
+            Authorization: `Bearer ${userToken}`
+        }
+    });
+    if (response.status === 200) {
+        return await response.json();
+    }
+    await logError(response);
+    return Promise.reject('Error while fetching discovered businesses')
+}
+
 async function logError(response) {
     let json = await response.json();
     console.log(`Response status ${response.status}`);
@@ -84,5 +99,6 @@ export default {
     authenticate,
     register,
     discoverBusinesses,
-    subscribeToBusiness
+    subscribeToBusiness,
+    getCustomerCoupons
 }
